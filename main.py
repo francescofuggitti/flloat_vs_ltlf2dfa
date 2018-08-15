@@ -2,31 +2,36 @@ from flloat.parser.ltlf import LTLfParser
 from ltlf2dfa.DotHandler import DotHandler
 from ltlf2dfa.Translator import Translator
 import timeit
+from timeit import Timer, repeat
 
-#import matplotlib.pyplot as plt
+# set back-end for matplotlib on OSX
+import matplotlib as mpl
+mpl.use('TkAgg')
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 flloat_formulas = ('!(a&b)|c',
-                     'Fa -> Fb',
-                     'F(a -> Fb)',
-                     'Fa <-> Fb',
-                     'G(a -> Fb)',
-                     #'(!bUa)|G(!b)',
-                     #'G(a -> X(!aUb))',
-                     'G(a -> Xb)',
-                     'G(Xb -> a)',
-                     'G(a <-> Xb)',
-                     '!(Fa & Fb)',
-                     'G(a -> !(Fb))',
-                     'G(a -> X(!b))'
+                     'Fa->Fb',
+                     'F(a->Fb)',
+                     'Fa<->Fb',
+                     'G(a->Fb)',
+                     '(!bUa)|G(!b)',
+                     'G(a->X(!aUb))',
+                     'G(a->Xb)',
+                     'G(Xb->a)',
+                     'G(a<->Xb)',
+                     '!(Fa&Fb)',
+                     'G(a->!(Fb))',
+                     'G(a->X(!b))'
                      )
 ltlf2dfa_formulas = ('~(a&b)|c',
                      'Ea -> Eb',
                      'E(a -> Eb)',
                      'Ea <-> Eb',
                      'G(a -> Eb)',
-                     #'(~bUa)|G(~b)',
-                     #'G(a -> X(~aUb))',
+                     '(~bUa)|G(~b)',
+                     'G(a -> X(~aUb))',
                      'G(a -> Xb)',
                      'G(Xb -> a)',
                      'G(a <-> Xb)',
@@ -53,11 +58,11 @@ def transform_to_dot_ltlf2dfa(f):
     translator.formula_parser()
     translator.translate()
     translator.createMonafile(False)  # it creates automa.mona file
-    translator.invoke_mona("automa.mona")  # it returns an intermediate automa.dot file
+    translator.invoke_mona()  # it returns an intermediate automa.dot file
 
-    # dotHandler = DotHandler("inter-automa.dot")
-    # dotHandler.modify_dot()
-    # dotHandler.output_dot()
+    dotHandler = DotHandler()
+    dotHandler.modify_dot()
+    dotHandler.output_dot()
 
 functions = (
     'transform_to_dot_flloat',
@@ -72,9 +77,9 @@ def plot_results(formulas, flloat_y_labels, ltlf2dfa_y_labels):
     fig, ax = plt.subplots()
 
     rects1 = ax.bar(ind, flloat_y_labels, width, color='r')
-    rects2 = ax.bar(ind + width, ltlf2dfa_y_labels, width, color='y')
+    rects2 = ax.bar(ind + width, ltlf2dfa_y_labels, width, color='g')
 
-    ax.set_ylabel('Time (ms)')
+    ax.set_ylabel('Time (s)')
     ax.set_title('Time comparison FLLOAT - LTLf2DFA')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(formulas)
@@ -83,10 +88,20 @@ def plot_results(formulas, flloat_y_labels, ltlf2dfa_y_labels):
     plt.show()
 
 if __name__ == '__main__':
-    temps = []
+    flloat_times = []
+    ltlf2dfa_times = []
+    for formula in flloat_formulas:
+        #for func in functions:
+        stmt = '{}(formula)'.format(functions[0])
+        setp = 'from __main__ import formula, {}'.format(functions[0])
+        # flloat_times.append(timeit.timeit(stmt, setp, number=1000))
+        flloat_times.append(min(repeat(stmt, setp, repeat=3, number=10)))
     for formula in ltlf2dfa_formulas:
         #for func in functions:
         stmt = '{}(formula)'.format(functions[1])
         setp = 'from __main__ import formula, {}'.format(functions[1])
-        temps.append(timeit.timeit(stmt, setp, number=100))
-    print(temps)
+        # ltlf2dfa_times.append(timeit.timeit(stmt, setp, number=1000))
+        # ltlf2dfa_times.append(timeit.Timer(stmt, setp).timeit(number=100) )
+        ltlf2dfa_times.append(min(repeat(stmt, setp, repeat=3, number=10)))
+    plot_results(flloat_formulas, flloat_times, ltlf2dfa_times)
+    # print(flloat_times)
