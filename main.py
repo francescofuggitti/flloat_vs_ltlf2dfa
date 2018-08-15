@@ -40,10 +40,6 @@ ltlf2dfa_formulas = ('~(a&b)|c',
                      'G(a -> X(~b))'
                      )
 
-# flloat_formulas = ('G( ( a <-> bUc ) <-> ( !d -> (Fe & fUg) ))',)
-# ltlf2dfa_formulas = ('G((a <-> bUc) <-> (~d -> (Ee & fUg)))',)
-
-# bU(Xc)
 def transform_to_dot_flloat(f):
 
     parser = LTLfParser()
@@ -57,8 +53,8 @@ def transform_to_dot_ltlf2dfa(f):
     translator = Translator(f)
     translator.formula_parser()
     translator.translate()
-    translator.createMonafile(False)  # it creates automa.mona file
-    translator.invoke_mona()  # it returns an intermediate automa.dot file
+    translator.createMonafile(False)
+    translator.invoke_mona()
 
     dotHandler = DotHandler()
     dotHandler.modify_dot()
@@ -77,12 +73,12 @@ def plot_results(formulas, flloat_y_labels, ltlf2dfa_y_labels):
     fig, ax = plt.subplots()
 
     rects1 = ax.bar(ind, flloat_y_labels, width, color='r')
-    rects2 = ax.bar(ind + width, ltlf2dfa_y_labels, width, color='g')
+    rects2 = ax.bar(ind + width, ltlf2dfa_y_labels, width, color='b')
 
     ax.set_ylabel('Time (s)')
     ax.set_title('Time comparison FLLOAT - LTLf2DFA')
     ax.set_xticks(ind + width / 2)
-    ax.set_xticklabels(formulas)
+    ax.set_xticklabels(formulas, rotation = 45, ha="right")
     ax.legend((rects1[0], rects2[0]), ('FLLOAT', 'LTLf2DFA'))
 
     plt.show()
@@ -91,13 +87,11 @@ if __name__ == '__main__':
     flloat_times = []
     ltlf2dfa_times = []
     for formula in flloat_formulas:
-        #for func in functions:
         stmt = '{}(formula)'.format(functions[0])
         setp = 'from __main__ import formula, {}'.format(functions[0])
         # flloat_times.append(timeit.timeit(stmt, setp, number=1000))
         flloat_times.append(min(repeat(stmt, setp, repeat=3, number=10)))
     for formula in ltlf2dfa_formulas:
-        #for func in functions:
         stmt = '{}(formula)'.format(functions[1])
         setp = 'from __main__ import formula, {}'.format(functions[1])
         # ltlf2dfa_times.append(timeit.timeit(stmt, setp, number=1000))
