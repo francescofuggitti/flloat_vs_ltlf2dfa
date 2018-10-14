@@ -27,4 +27,4 @@ the results.
 Histogram reporting the minimum value of 100 executions for each formula,
 repeated 3 times.
 
-![](https://github.com/Francesco17/flloat_vs_ltlf2dfa/blob/master/2018-08-15-timeRepeatBlue45ha-3:100.png "Benchmark")
+![](https://github.com/Francesco17/flloat_vs_ltlf2dfa/blob/master/time-comparison.png "Benchmark")
